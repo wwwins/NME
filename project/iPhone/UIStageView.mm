@@ -969,47 +969,143 @@ public:
 
 
 /* UITextFieldDelegate method.  Invoked when user types something. */
-
 - (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
 
-   if ([string length] == 0)
-   {
-      /* SDL hack to detect delete */
-      Event key_down(etKeyDown);
-      key_down.code = keyBACKSPACE;
-      key_down.value = keyBACKSPACE;
-      mStage->OnEvent(key_down);
+	if([[UITextInputMode currentInputMode].primaryLanguage isEqualToString:@"zh-Hant"]) {
+		if([string length] > 0)
+		{
+			// CJK unicode range U+4E00-9FA5
+			if([string characterAtIndex:0] >= 0x4e00 && [string characterAtIndex:0] <= 0x9fa5) {
+				for(int i = 0 ; i < [string length] ; i++) {
+					unichar curChar = [string characterAtIndex:i];
 
-      Event key_up(etKeyUp);
-      key_up.code = keyBACKSPACE;
-      key_up.value = keyBACKSPACE;
-      mStage->OnEvent(key_up);
-   }
-   else
-   {
-      /* go through all the characters in the string we've been sent
-         and convert them to key presses */
-      for(int i=0; i<[string length]; i++)
-      {
-         unichar c = [string characterAtIndex: i];
+					Event key_down(etKeyDown);
+					key_down.code = curChar;
+					key_down.value = curChar;
+					mStage->OnEvent(key_down);
 
-         Event key_down(etKeyDown);
-         key_down.code = c;
-         key_down.value = c;
-         mStage->OnEvent(key_down);
-         
-         Event key_up(etKeyUp);
-         key_up.code = c;
-         key_up.value = c;
-         mStage->OnEvent(key_up);
-      }
-   }
+					Event key_up(etKeyUp);
+					key_up.code = curChar;
+					key_up.value = curChar;
+					mStage->OnEvent(key_up);
+				}
+			} else {
+				bool bSend = NO;
+				if (string.length > 0 && range.length == 0) {
+					for(int i = 0 ; i < [string length] ; i++) {
+						unichar curChar = [string characterAtIndex:i];
+						// A-Za-z:   U+0041-005A U+0061-007A
+						// 注音符號: U+3100-312F
+						// 聲調符號: U+02C9 02D9 02CA 02CB 02C7
+						NSLog(@"unicode:%X",curChar);
+						if([string characterAtIndex:i] == 0x02c9 || [string characterAtIndex:i] == 0x02d9 || [string characterAtIndex:i] == 0x02ca || [string characterAtIndex:i] == 0x02cb || [string characterAtIndex:i] == 0x02c7 || ([string characterAtIndex:i] >= 0x3100 && [string characterAtIndex:i] <= 0x312f))
+							NSLog(@"skip:%C",curChar);
+						else{
+							Event key_down(etKeyDown);
+							key_down.code = curChar;
+							key_down.value = curChar;
+							mStage->OnEvent(key_down);
 
-   return NO; /* don't allow the edit! (keep placeholder text there) */
+							Event key_up(etKeyUp);
+							key_up.code = curChar;
+							key_up.value = curChar;
+							mStage->OnEvent(key_up);
+						}
+					}
+					bSend = YES;
+				}
+				if (range.length > 0 && !bSend) {
+					for(int i = 0 ; i < [string length] ; i++) {
+						unichar curChar = [string characterAtIndex:i];
+						Event key_down(etKeyDown);
+						key_down.code = curChar;
+						key_down.value = curChar;
+						mStage->OnEvent(key_down);
+
+						Event key_up(etKeyUp);
+						key_up.code = curChar;
+						key_up.value = curChar;
+						mStage->OnEvent(key_up);
+					}
+				}
+			}
+			return YES;
+			}
+			else
+			{
+				// Address the issue of Chinese handwriting
+				if (range.length > 0 ) {
+					NSString *marked = [_textField textInRange:_textField.markedTextRange];
+					if (marked == nil) {
+						/* SDL hack to detect delete */
+						Event key_down(etKeyDown);
+						key_down.code = keyBACKSPACE;
+						key_down.value = keyBACKSPACE;
+						mStage->OnEvent(key_down);
+
+						Event key_up(etKeyUp);
+						key_up.code = keyBACKSPACE;
+						key_up.value = keyBACKSPACE;
+						mStage->OnEvent(key_up);
+
+						return NO;
+					}
+					else
+					{
+						return YES;
+					}
+
+				}
+				else
+				{
+					return YES;
+				}
+			}
+
+		}
+
+		// english
+		if([string length] > 0)
+		{
+			for(int i = 0 ; i < [string length] ; i++)
+			{
+				unichar curChar = [string characterAtIndex:i];//Improved handling of chinese keyboards
+
+				// special handling for return/enter key
+				Event key_down(etKeyDown);
+				key_down.code = curChar;
+				key_down.value = curChar;
+				mStage->OnEvent(key_down);
+
+				Event key_up(etKeyUp);
+				key_up.code = curChar;
+				key_up.value = curChar;
+				mStage->OnEvent(key_up);
+			}
+
+		}
+		else
+		{
+			// space
+			Event key_down(etKeyDown);
+			key_down.code = keyBACKSPACE;
+			key_down.value = keyBACKSPACE;
+			mStage->OnEvent(key_down);
+
+			Event key_up(etKeyUp);
+			key_up.code = keyBACKSPACE;
+			key_up.value = keyBACKSPACE;
+			mStage->OnEvent(key_up);
+		}
+
+		return NO;
+
+
 }
 
 /* Terminates the editing session */
 - (BOOL)textFieldShouldReturn:(UITextField*)_textField {
+NSLog(@"shouldReturn");
    if (mStage->FinishEditOnEnter())
    {
       mStage->SetFocusObject(0);

@@ -1,4 +1,4 @@
-# NME [![Build Status](https://travis-ci.org/haxenme/NME.png?branch=master)](https://travis-ci.org/haxenme/NME)
+# NME
 
 NME is a game and application framework that currently targets Windows, Mac, Linux, iOS, Android, BlackBerry, Flash, HTML5, while providing legacy support for webOS.
 
@@ -8,94 +8,14 @@ Learn more about NME at http://www.nme.io
 
 ## Installation
 
-### Release Version
-
-You can get a release installer for Windows, Mac or Linux at http://www.nme.io/download.
-
-
 ### Source Builds
 
-To use NME from the source, follow these steps:
+https://github.com/openfl/openfl-native
 
- 1. Install Haxe 3 and Neko 2, available [here](http://haxe.org/manual/haxe3).
+```
+openfl rebuild ios
+```
 
- 2. Install Haxe libraries that NME depends on:
- 
- ```
- haxelib install hxcpp
- haxelib install format
- haxelib install svg
- haxelib install swf
- haxelib install xfl
- ```
- 
- 3. Clone this repository, then tell haxelib where it is located:
- 
- ```
- haxelib dev nme C:\Development\Haxe\nme
- ```
- 
- 4. Make sure you can compile a simple Haxe program targeting C++.
-
- 5. Install latest version of **nmedev**.
-     * For Mac or Linux, install "nmedev":
-     
-     ```
-     haxelib git nmedev https://github.com/haxenme/nmedev.git
-     ```
-     * For Windows, clone https://github.com/haxenme/nmedev, then tell haxelib where it is located:
-     
-     ```
-     haxelib dev nmedev C:\Development\Haxe\nmedev
-     ```
-
- 6. Alias the command `haxelib run nme` as `nme`.
-
- ```
- haxelib run nme setup # add `sudo` in the front for Mac or Linux
- ```
-
- 7. Build the command-line tools if needed:
-
- ```
- nme rebuild tools
- ```
- 
- It does not need to be built often - only if changes have occurred in the **tools** directory.
-
- 8. Build a native library, using one or more of these commands:
- 
- ```
- nme rebuild clean
- nme rebuild windows
- nme rebuild mac
- nme rebuild linux -32
- nme rebuild linux -64
- nme rebuild android
- nme rebuild blackberry
- nme rebuild ios
- nme rebuild webos
- ```
-
- You can also combine "rebuild" commands, using commas:
- 
- ```
- nme rebuild tools,clean,windows
- ```
- 
- The requirements to build a native library is similar to building an NME application for that platform. You can learn more on the [NME download page](http://www.nme.io/download).
-
- The native libraries also do not need to be built often - only if changes have occurred in the **project** directory.
-
-## Contribution
-
-We accept and encourage contribution to the project.
-Contribution can be in the form of:
- * Reporting / fixing bugs
- * Development of NME or NME extension
- * Documentation
-
-Please read our [wiki](https://github.com/haxenme/NME/wiki) for more info.
 
 ## License
 
